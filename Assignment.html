@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+<title>PA1</title>
+<style type = "text/css">
+    body {
+        background-color: #EEEEEE;
+    }
+    input[type=range] {
+    -webkit-appearance: none;
+    margin: 3px 0;
+    width: 100%;
+  }
+  input[type=range]:focus {
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 12.8px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #51b56a;
+    border-radius: 25px;
+    border: 0px solid #000101;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 20px;
+    width: 29px;
+    border-radius: 7px;
+    background: #65001c;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -3.6px;
+  }
+  input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #51b56a;
+  }
+  input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 12.8px;
+    cursor: pointer;
+    animate: 0.2s;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #51b56a;
+    border-radius: 25px;
+    border: 0px solid #000101;
+  }
+  input[type=range]::-moz-range-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 20px;
+    width: 39px;
+    border-radius: 7px;
+    background: #65001c;
+    cursor: pointer;
+  }
+  input[type=range]::-ms-track {
+    width: 100%;
+    height: 12.8px;
+    cursor: pointer;
+    animate: 0.2s;
+    background: transparent;
+    border-color: transparent;
+    border-width: 39px 0;
+    color: transparent;
+  }
+  input[type=range]::-ms-fill-lower {
+    background: #51b56a;
+    border: 0px solid #000101;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  }
+  input[type=range]::-ms-fill-upper {
+    background: #51b56a;
+    border: 0px solid #000101;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+  }
+  input[type=range]::-ms-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 0px solid #000000;
+    height: 20px;
+    width: 39px;
+    border-radius: 7px;
+    background: #65001c;
+    cursor: pointer;
+  }
+  input[type=range]:focus::-ms-fill-lower {
+    background: #51b56a;
+  }
+  input[type=range]:focus::-ms-fill-upper {
+    background: #51b56a;
+  }
+</style>
+
+<!--
+    An example using a TrackballRotator, defined in TrackballRotator.js,
+    to implement rotation by mouse.
+-->
+
+<script src="./Utils/trackball-rotator.js"></script>
+<script src="https://webgl2fundamentals.org/webgl/resources/m4.js"></script>
+<script src="./main.js"></script>
+
+
+</head>
+<body onload="init()">
+
+<h2> Practical assignment №1</h2>
+<p id="title">Continuous Topographic Surface of Cassini</p>
+<p id="title">Nagornyi Yegor TR-21mp</p>
+
+<div id="management">
+  <label for="eye_separation">Eye separation</label>
+  <input type="range" id="eye_separation" min="1" max="500" onchange="handleEyeSeparationChange()" value ="0">
+   
+</div>
+<div id="management">
+  <label for="convergence">Convergence</label>
+  <input type="range" id="convergence" name="convergence" min="100" max="10000" onchange="handleConvergenceChange()" value="2000" step="30">
+    
+</div>
+<div id="management">
+  <label for="fov">FOV along Y in degrees</label>
+  <input type="range" id="fov" name="fov" min="1" max="500" onchange="handleFovChange()" value="250" step="1">
+    
+</div>
+<div id="management">
+  <label for="nearclippingdistance">Near Clipping Distance</label>
+  <input type="range" id="nearclippingdistance" name="nearclippingdistance" min="1" max="40" onchange ="handleNearChange()" value="1"
+                step="1">
+    
+</div> 
+<div id="management1">
+  <label for="isFilled">Filled</label>
+  <input type="checkbox" id="isFilled" onchange="handleCheckboxChange()">
+   
+</div>
+
+
+<div id="canvas-holder">
+   <canvas width="1862" height="800" id="webglcanvas" style="background-color:red"></canvas>
+</div>
+
+</body></html>
+<style>
+  h2{
+    text-align: center;
+    font: small-caps bold 24px/1 sans-serif;
+  }
+  #title{
+    font: 1.2em "Fira Sans", sans-serif;
+  }
+  #management {
+    font: 1.2em "Fira Sans", sans-serif;
+    text-align: center;
+    padding-bottom: 15px;
+  }
+  #management1 {
+    font: 1.2em "Fira Sans", sans-serif;
+    padding-bottom: 25px;
+  }
+</style>
