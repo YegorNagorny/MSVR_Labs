@@ -4,26 +4,26 @@ function TrackballRotator(canvas, callback, viewDistance, viewpointDirection, vi
     var unitz = new Array(3);
     var viewZ;  // відстань камери; z-коорда в координатах ока;
     var center; // центр комери(зору); обертання навколо цієї точки; за замовчуванням [0,0,0]
-    this.setView = function( viewDistance, viewpointDirection, viewUp ) {
-        unitz = (viewpointDirection === undefined)? [0,0,25] : viewpointDirection;
-        viewUp = (viewUp === undefined)? [0,1,0] : viewUp;
+    this.setView = function (viewDistance, viewpointDirection, viewUp) {
+        unitz = (viewpointDirection === undefined) ? [0, 0, 25] : viewpointDirection;
+        viewUp = (viewUp === undefined) ? [0, 1, 0] : viewUp;
         viewZ = viewDistance;
         normalize(unitz, unitz);
-        copy(unity,unitz);
-        scale(unity, unity, dot(unitz,viewUp));
-        subtract(unity,viewUp,unity);
-        normalize(unity,unity);
-        cross(unitx,unity,unitz);
+        copy(unity, unitz);
+        scale(unity, unity, dot(unitz, viewUp));
+        subtract(unity, viewUp, unity);
+        normalize(unity, unity);
+        cross(unitx, unity, unitz);
     };
-    this.getViewMatrix = function() {
-        var mat = [ unitx[0], unity[0], unitz[0], 0,
-                unitx[1], unity[1], unitz[1], 0, 
-                unitx[2], unity[2], unitz[2], 0,
-                0, 0, 0, 1 ];
+    this.getViewMatrix = function () {
+        var mat = [unitx[0], unity[0], unitz[0], 0,
+        unitx[1], unity[1], unitz[1], 0,
+        unitx[2], unity[2], unitz[2], 0,
+            0, 0, 0, 1];
         if (center !== undefined) {  // помножити ліворуч шляхом переводу за допомогою rotationCenter, праворуч шляхом переводу за допомогою -rotationCenter
-            var t0 = center[0] - mat[0]*center[0] - mat[4]*center[1] - mat[8]*center[2];
-            var t1 = center[1] - mat[1]*center[0] - mat[5]*center[1] - mat[9]*center[2];
-            var t2 = center[2] - mat[2]*center[0] - mat[6]*center[1] - mat[10]*center[2];
+            var t0 = center[0] - mat[0] * center[0] - mat[4] * center[1] - mat[8] * center[2];
+            var t1 = center[1] - mat[1] * center[0] - mat[5] * center[1] - mat[9] * center[2];
+            var t2 = center[2] - mat[2] * center[0] - mat[6] * center[1] - mat[10] * center[2];
             mat[12] = t0;
             mat[13] = t1;
             mat[14] = t2;
@@ -33,34 +33,34 @@ function TrackballRotator(canvas, callback, viewDistance, viewpointDirection, vi
         }
         return mat;
     };
-    this.getViewDistance = function() {
+    this.getViewDistance = function () {
         return viewZ;
     };
-    this.setViewDistance = function(viewDistance) {
+    this.setViewDistance = function (viewDistance) {
         viewZ = viewDistance;
     };
-    this.getRotationCenter = function() {
-        return (center === undefined) ? [0,0,0] : center;
+    this.getRotationCenter = function () {
+        return (center === undefined) ? [0, 0, 0] : center;
     };
-    this.setRotationCenter = function(rotationCenter) {
+    this.setRotationCenter = function (rotationCenter) {
         center = rotationCenter;
     };
     this.setView(viewDistance, viewpointDirection, viewUp);
     canvas.addEventListener("mousedown", doMouseDown, false);
     canvas.addEventListener("touchstart", doTouchStart, false);
-    window.addEventListener("deviceorientation", function(evt) {
+    window.addEventListener("deviceorientation", function (evt) {
         var degtorad = Math.PI / 180; // Перетворення градусу в радіан
 
-        var _x = evt.beta  ? evt.beta  * degtorad : 0; // beta 
+        var _x = evt.beta ? evt.beta * degtorad : 0; // beta 
         var _y = evt.gamma ? evt.gamma * degtorad : 0; // gamma 
         var _z = evt.alpha ? evt.alpha * degtorad : 0; // alpha 
 
-        var cX = Math.cos( _x );
-        var cY = Math.cos( _y );
-        var cZ = Math.cos( _z );
-        var sX = Math.sin( _x );
-        var sY = Math.sin( _y );
-        var sZ = Math.sin( _z );
+        var cX = Math.cos(_x);
+        var cY = Math.cos(_y);
+        var cZ = Math.cos(_z);
+        var sX = Math.sin(_x);
+        var sY = Math.sin(_y);
+        var sZ = Math.sin(_z);
 
         //
         // Побудова матриці обертання ZXY.
@@ -78,41 +78,41 @@ function TrackballRotator(canvas, callback, viewDistance, viewpointDirection, vi
         var m32 = sX;
         var m33 = cX * cY;
 
-        unitx = [m11,    m12,    m13];
-        unity = [m21,    m22,    m23];
-        unitz = [m31,    m32,    m33];
+        unitx = [m11, m12, m13];
+        unity = [m21, m22, m23];
+        unitz = [m31, m32, m33];
     }, true);
     function applyTransvection(e1, e2) {  // повернути вектор e1 на e2
         function reflectInAxis(axis, source, destination) {
             var s = 2 * (axis[0] * source[0] + axis[1] * source[1] + axis[2] * source[2]);
-            destination[0] = s*axis[0] - source[0];
-            destination[1] = s*axis[1] - source[1];
-            destination[2] = s*axis[2] - source[2];
+            destination[0] = s * axis[0] - source[0];
+            destination[1] = s * axis[1] - source[1];
+            destination[2] = s * axis[2] - source[2];
         }
-        normalize(e1,e1);
-        normalize(e2,e2);
-        var e = [0,0,0];
-        add(e,e1,e2);
-        normalize(e,e);
-        var temp = [0,0,0];
-        reflectInAxis(e,unitz,temp);
-        reflectInAxis(e1,temp,unitz);
-        reflectInAxis(e,unitx,temp);
-        reflectInAxis(e1,temp,unitx);
-        reflectInAxis(e,unity,temp);
-        reflectInAxis(e1,temp,unity);
+        normalize(e1, e1);
+        normalize(e2, e2);
+        var e = [0, 0, 0];
+        add(e, e1, e2);
+        normalize(e, e);
+        var temp = [0, 0, 0];
+        reflectInAxis(e, unitz, temp);
+        reflectInAxis(e1, temp, unitz);
+        reflectInAxis(e, unitx, temp);
+        reflectInAxis(e1, temp, unitx);
+        reflectInAxis(e, unity, temp);
+        reflectInAxis(e1, temp, unity);
     }
     var centerX, centerY, radius2;
-    var prevx,prevy;
+    var prevx, prevy;
     var dragging = false;
     function doMouseDown(evt) {
         if (dragging)
-           return;
+            return;
         dragging = true;
-        centerX = canvas.width/2;
-        centerY = canvas.height/2;
-        var radius = Math.min(centerX,centerY);
-        radius2 = radius*radius;
+        centerX = canvas.width / 2;
+        centerY = canvas.height / 2;
+        var radius = Math.min(centerX, centerY);
+        radius2 = radius * radius;
         document.addEventListener("mousemove", doMouseDrag, false);
         document.addEventListener("mouseup", doMouseUp, false);
         var box = canvas.getBoundingClientRect();
@@ -121,13 +121,13 @@ function TrackballRotator(canvas, callback, viewDistance, viewpointDirection, vi
     }
     function doMouseDrag(evt) {
         if (!dragging)
-           return;
+            return;
         var box = canvas.getBoundingClientRect();
         var x = evt.clientX - box.left;
         var y = evt.clientY - box.top;
-        var ray1 = toRay(prevx,prevy);
-        var ray2 = toRay(x,y);
-        applyTransvection(ray1,ray2);
+        var ray1 = toRay(prevx, prevy);
+        var ray2 = toRay(x, y);
+        applyTransvection(ray1, ray2);
         prevx = x;
         prevy = y;
         if (callback) {
@@ -143,8 +143,8 @@ function TrackballRotator(canvas, callback, viewDistance, viewpointDirection, vi
     }
     function doTouchStart(evt) {
         if (evt.touches.length != 1) {
-           doTouchCancel();
-           return;
+            doTouchCancel();
+            return;
         }
         evt.preventDefault();
         var r = canvas.getBoundingClientRect();
@@ -154,23 +154,23 @@ function TrackballRotator(canvas, callback, viewDistance, viewpointDirection, vi
         canvas.addEventListener("touchend", doTouchEnd, false);
         canvas.addEventListener("touchcancel", doTouchCancel, false);
         touchStarted = true;
-        centerX = canvas.width/2;
-        centerY = canvas.height/2;
-        var radius = Math.min(centerX,centerY);
-        radius2 = radius*radius;
+        centerX = canvas.width / 2;
+        centerY = canvas.height / 2;
+        var radius = Math.min(centerX, centerY);
+        radius2 = radius * radius;
     }
     function doTouchMove(evt) {
         if (evt.touches.length != 1 || !touchStarted) {
-           doTouchCancel();
-           return;
+            doTouchCancel();
+            return;
         }
         evt.preventDefault();
         var r = canvas.getBoundingClientRect();
         var x = evt.touches[0].clientX - r.left;
         var y = evt.touches[0].clientY - r.top;
-        var ray1 = toRay(prevx,prevy);
-        var ray2 = toRay(x,y);
-        applyTransvection(ray1,ray2);
+        var ray1 = toRay(prevx, prevy);
+        var ray2 = toRay(x, y);
+        applyTransvection(ray1, ray2);
         prevx = x;
         prevy = y;
         if (callback) {
@@ -182,64 +182,64 @@ function TrackballRotator(canvas, callback, viewDistance, viewpointDirection, vi
     }
     function doTouchCancel() {
         if (touchStarted) {
-           touchStarted = false;
-           canvas.removeEventListener("touchmove", doTouchMove, false);
-           canvas.removeEventListener("touchend", doTouchEnd, false);
-           canvas.removeEventListener("touchcancel", doTouchCancel, false);
+            touchStarted = false;
+            canvas.removeEventListener("touchmove", doTouchMove, false);
+            canvas.removeEventListener("touchend", doTouchEnd, false);
+            canvas.removeEventListener("touchcancel", doTouchCancel, false);
         }
     }
-    function toRay(x,y) {  // перетворює точку (x,y) у піксельних координатах на тривимірний промінь шляхом відображення внутрішньої частини
-                           // коло на площині до півкулі, коло є екватором.
-       var dx = x - centerX;
-       var dy = centerY - y;
-       var vx = dx * unitx[0] + dy * unity[0];  // Точка курсору як вектор у площині зображення.
-       var vy = dx * unitx[1] + dy * unity[1];
-       var vz = dx * unitx[2] + dy * unity[2];
-       var dist2 = vx*vx + vy*vy + vz*vz;
-       if (dist2 > radius2) {  // Відображення точки поза колом
-          return [vx,vy,vz];
-       }
-       else {
-          var z = Math.sqrt(radius2 - dist2);
-          return  [vx+z*unitz[0], vy+z*unitz[1], vz+z*unitz[2]];
+    function toRay(x, y) {  // перетворює точку (x,y) у піксельних координатах на тривимірний промінь шляхом відображення внутрішньої частини
+        // коло на площині до півкулі, коло є екватором.
+        var dx = x - centerX;
+        var dy = centerY - y;
+        var vx = dx * unitx[0] + dy * unity[0];  // Точка курсору як вектор у площині зображення.
+        var vy = dx * unitx[1] + dy * unity[1];
+        var vz = dx * unitx[2] + dy * unity[2];
+        var dist2 = vx * vx + vy * vy + vz * vz;
+        if (dist2 > radius2) {  // Відображення точки поза колом
+            return [vx, vy, vz];
+        }
+        else {
+            var z = Math.sqrt(radius2 - dist2);
+            return [vx + z * unitz[0], vy + z * unitz[1], vz + z * unitz[2]];
         }
     }
-    function dot(v,w) {
-        return v[0]*w[0] + v[1]*w[1] + v[2]*w[2];
+    function dot(v, w) {
+        return v[0] * w[0] + v[1] * w[1] + v[2] * w[2];
     }
     function length(v) {
-        return Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+        return Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     }
-    function normalize(v,w) {
+    function normalize(v, w) {
         var d = length(w);
-        v[0] = w[0]/d;
-        v[1] = w[1]/d;
-        v[2] = w[2]/d;
+        v[0] = w[0] / d;
+        v[1] = w[1] / d;
+        v[2] = w[2] / d;
     }
-    function copy(v,w) {
+    function copy(v, w) {
         v[0] = w[0];
         v[1] = w[1];
         v[2] = w[2];
     }
-    function add(sum,v,w) {
+    function add(sum, v, w) {
         sum[0] = v[0] + w[0];
         sum[1] = v[1] + w[1];
         sum[2] = v[2] + w[2];
     }
-    function subtract(dif,v,w) {
+    function subtract(dif, v, w) {
         dif[0] = v[0] - w[0];
         dif[1] = v[1] - w[1];
         dif[2] = v[2] - w[2];
     }
-    function scale(ans,v,num) {
+    function scale(ans, v, num) {
         ans[0] = v[0] * num;
         ans[1] = v[1] * num;
         ans[2] = v[2] * num;
     }
-    function cross(c,v,w) {
-        var x = v[1]*w[2] - v[2]*w[1];
-        var y = v[2]*w[0] - v[0]*w[2];
-        var z = v[0]*w[1] - v[1]*w[0];
+    function cross(c, v, w) {
+        var x = v[1] * w[2] - v[2] * w[1];
+        var y = v[2] * w[0] - v[0] * w[2];
+        var z = v[0] * w[1] - v[1] * w[0];
         c[0] = x;
         c[1] = y;
         c[2] = z;
@@ -305,12 +305,36 @@ let nearclippingdistance = 1;
 
 let rotationMatrix = getRotationMatrix();
 
+navigator.mediaDevices.getUserMedia({
+    video: true
+}).then((stream) => {
+    // Set the video source to the webcam stream
+    video.srcObject = stream;
+
+    // Wait for the video to load metadata
+    video.onloadedmetadata = function () {
+        // Start the video playback
+        video.play();
+
+        // Continuously update the canvas with the video frames
+        function updateCanvas() {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+            draw();
+        }
+        // Start updating the canvas
+        updateCanvas();
+    };
+}).catch((error) => {
+    console.error('Error accessing the webcam: ', error);
+});
+
 const _c = 8;
 
-const funct = (u, z, a) => Math.sqrt((z*3)**2*Math.cos(2*u) + Math.sqrt(a**4 - (z*3)**4*Math.sin(2*u)**2));
+const funct = (u, z, a) => Math.sqrt((z * 3) ** 2 * Math.cos(2 * u) + Math.sqrt(a ** 4 - (z * 3) ** 4 * Math.sin(2 * u) ** 2));
 
 const x = (u, v) => funct(u, v, _c) * Math.cos(u);
-const y = (u, v) => funct(u, v, _c)* Math.sin(u);
+const y = (u, v) => funct(u, v, _c) * Math.sin(u);
 const z = (v) => 8 * v;
 
 /* Draws a WebGL primitive.  The first parameter must be one of the constants
@@ -348,18 +372,18 @@ function drawPrimitive(primitiveType, color, vertices, texCoords) {
 
 const degtorad = Math.PI / 180; // Degree-to-Radian conversion
 
-function getRotationMatrix( alpha, beta, gamma ) {
+function getRotationMatrix(alpha, beta, gamma) {
 
-    const _x = beta  ? -beta  * degtorad : 0; // beta 
+    const _x = beta ? -beta * degtorad : 0; // beta 
     const _y = gamma ? -gamma * degtorad : 0; // gamma 
     const _z = alpha ? -alpha * degtorad : 0; // alpha 
 
-    const cX = Math.cos( _x );
-    const cY = Math.cos( _y );
-    const cZ = Math.cos( _z );
-    const sX = Math.sin( _x );
-    const sY = Math.sin( _y );
-    const sZ = Math.sin( _z );
+    const cX = Math.cos(_x);
+    const cY = Math.cos(_y);
+    const cZ = Math.cos(_z);
+    const sX = Math.sin(_x);
+    const sY = Math.sin(_y);
+    const sZ = Math.sin(_z);
 
     //
     // ZXY rotation matrix construction.
@@ -386,7 +410,7 @@ function getRotationMatrix( alpha, beta, gamma ) {
 
 }
 
-window.addEventListener('deviceorientation', function(event) {
+window.addEventListener('deviceorientation', function (event) {
     rotationMatrix = getRotationMatrix(event.alpha, event.beta, event.gamma);
     draw();
 });
@@ -396,10 +420,10 @@ function DrawSurface() {
     let i = 0;
 
     // Apply equations and draw horizontal meridians
-    for (let u = 0; u <= 2*Math.PI; u += Math.PI / 12) {
+    for (let u = 0; u <= 2 * Math.PI; u += Math.PI / 12) {
         let coordinates = [];
 
-        for (let v = 0; v <= 8/3*2 - 8/3; v += Math.PI / 12) {
+        for (let v = 0; v <= 8 / 3 * 2 - 8 / 3; v += Math.PI / 12) {
             const generatedCoords = [x(u, v), y(u, v), z(v)];
 
             coordinates = [...coordinates, ...generatedCoords];
@@ -439,7 +463,7 @@ function DrawSurface() {
         }
     }
 
-    
+
     gl.lineWidth(4);
     gl.lineWidth(1);
 }
@@ -450,7 +474,7 @@ function DrawSurface() {
  * way to draw with WebGL.  Here, the geometry is so simple that it doesn't matter.)
  */
 function draw() {
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -621,7 +645,7 @@ function init() {
     }
 
     spaceball = new TrackballRotator(canvas, draw, 0);
-    window.addEventListener('deviceorientation', function(event) {
+    window.addEventListener('deviceorientation', function (event) {
         rotationMatrix = getRotationMatrix(event.alpha, event.beta, event.gamma);
         draw();
     });
